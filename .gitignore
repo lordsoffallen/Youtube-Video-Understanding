@@ -1,6 +1,12 @@
 .ipynb_checkpoints
 
-.vscode
+utils/.ipynb_checkpoints
+
+.vscode/
+
+.idea/
+
+logs/
 
 utils/_pycache__/
 
