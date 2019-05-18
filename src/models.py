@@ -2,7 +2,7 @@ from .metrics import top5_acc, top1_acc
 from .data import get_data
 from tensorflow.python.keras import Model, Sequential
 from tensorflow.python.keras.layers import Dense, Flatten, LSTM, GRU
-from tensorflow.python.keras.layers import Conv1D, MaxPooling1D, Reshape
+from tensorflow.python.keras.layers import Conv1D, MaxPooling1D, Reshape, Conv2D
 from tensorflow.python.keras.callbacks import EarlyStopping, TensorBoard
 from tensorflow.python.keras.backend import clear_session
 
@@ -38,7 +38,7 @@ def dnn_model(units, input_shape=(1024,), num_classes=3862):
     return model
 
 
-def cnn_model(units, pooling=False, input_shape=(1024,), num_classes=3862):
+def cnn_model(units, kernel_size=3, strides=1, pool=2, input_shape=(1024,), num_classes=3862):
     """ Create a CNN model. Default kernel size is (3, 3)
 
     Parameters
@@ -46,8 +46,13 @@ def cnn_model(units, pooling=False, input_shape=(1024,), num_classes=3862):
     units: int, list
         Number of units in convolution layer. If given an iterable,
         then will create different layers for each units.
-    pooling: bool
-        Whether to add pooling after conv layer or not. Default is False
+    kernel_size: int
+        Kernel size of the conv. Default is 3
+    strides: int
+        Strides size of conv. Default is 1
+    pool: int
+        Whether to add pooling after conv layer or not. If 0 no pooling
+        will be added.
     input_shape: tuple, list
         Input shape of the model
     num_classes: int
@@ -60,16 +65,16 @@ def cnn_model(units, pooling=False, input_shape=(1024,), num_classes=3862):
     """
 
     model = Sequential()
-    model.add(Reshape((1, input_shape[0]), input_shape=input_shape))
+    model.add(Reshape((input_shape[0], 1), input_shape=input_shape))
     if isinstance(units, int):
-        model.add(Conv1D(units, 3, padding='same', activation='relu'))
-        if pooling:
-            model.add(MaxPooling1D())
+        model.add(Conv1D(units, kernel_size, strides=strides, padding='valid', activation='relu'))
+        if pool > 0:
+            model.add(MaxPooling1D(pool))
     else:
         for unit in units:
-            model.add(Conv1D(unit, 3, padding='same', activation='relu'))
-            if pooling:
-                model.add(MaxPooling1D())
+            model.add(Conv1D(unit, kernel_size, strides=strides, padding='valid', activation='relu'))
+            if pool:
+                model.add(MaxPooling1D(pool))
 
     model.add(Flatten())
     model.add(Dense(num_classes, activation='sigmoid'))
@@ -96,7 +101,7 @@ def lstm_model(units, input_shape=(1024,), num_classes=3862):
     """
 
     model = Sequential()
-    model.add(Reshape((1, input_shape[0]), input_shape=input_shape))
+    model.add(Reshape((input_shape[0], 1), input_shape=input_shape))
     if isinstance(units, int):
         model.add(LSTM(units))
     else:
@@ -127,7 +132,7 @@ def gru_model(units, input_shape=(1024,), num_classes=3862):
     """
 
     model = Sequential()
-    model.add(Reshape((1, input_shape[0]), input_shape=input_shape))
+    model.add(Reshape((input_shape[0], 1), input_shape=input_shape))
     if isinstance(units, int):
         model.add(GRU(units))
     else:
@@ -138,20 +143,26 @@ def gru_model(units, input_shape=(1024,), num_classes=3862):
     return model
 
 
-def create_model(units, choice='cnn', input_shape=(1024,), pooling=True):
+def create_model(units, choice='cnn', input_shape=(1024,), kernel_size=3, strides=1, pool=2):
     """ Create a model given the model choice. Pooling only effects
     CNN model.
 
     Parameters
     ----------
+
     units: int, list
         Number of units in each layer
     choice: str
         Available choices are cnn, lstm, gru and dnn.
     input_shape: tuple, list
         Input shape of the model
-    pooling: bool
-        Apply max pool after conv layer. Effects only cnn model
+    kernel_size: int
+        Kernel size when choice is cnn
+    strides: int
+        Strides size when choice is cnn
+    pool: int
+        Apply max pool after conv layer. Effects only cnn model. If 0 or <0
+        then no pooling will be done.
 
     Returns
     -------
@@ -160,7 +171,8 @@ def create_model(units, choice='cnn', input_shape=(1024,), pooling=True):
     """
 
     if choice is 'cnn':
-        model = cnn_model(units=units, input_shape=input_shape, pooling=pooling)
+        model = cnn_model(units=units, input_shape=input_shape,
+                          kernel_size=kernel_size, strides=strides, pool=pool)
     elif choice is 'lstm':
         model = lstm_model(units=units, input_shape=input_shape)
     elif choice is 'gru':
