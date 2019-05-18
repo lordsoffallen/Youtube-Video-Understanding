@@ -1,8 +1,8 @@
 from .metrics import top5_acc, top1_acc
 from .data import get_data
 from tensorflow.python.keras import Model, Sequential
-from tensorflow.python.keras.layers import Dense, Flatten, LSTM, GRU
-from tensorflow.python.keras.layers import Conv1D, MaxPooling1D, Reshape, Conv2D
+from tensorflow.python.keras.layers import Dense, Flatten, LSTM, GRU, Reshape
+from tensorflow.python.keras.layers import Conv1D, MaxPooling1D, CuDNNLSTM, CuDNNGRU
 from tensorflow.python.keras.callbacks import EarlyStopping, TensorBoard
 from tensorflow.python.keras.backend import clear_session
 
@@ -81,7 +81,7 @@ def cnn_model(units, kernel_size=3, strides=1, pool=2, input_shape=(1024,), num_
     return model
 
 
-def lstm_model(units, input_shape=(1024,), num_classes=3862):
+def lstm_model(units, input_shape=(1024,), num_classes=3862, gpu=False):
     """ Create a LSTM model.
 
     Parameters
@@ -93,6 +93,9 @@ def lstm_model(units, input_shape=(1024,), num_classes=3862):
         Input shape of the model
     num_classes: int
         Number of output classes.
+    gpu: bool
+        If GPU is enabled, then set this to true to use cuDNNLSTM
+        which is much faster.
 
     Returns
     -------
@@ -102,17 +105,24 @@ def lstm_model(units, input_shape=(1024,), num_classes=3862):
 
     model = Sequential()
     model.add(Reshape((input_shape[0], 1), input_shape=input_shape))
-    if isinstance(units, int):
-        model.add(LSTM(units))
+    if gpu:
+        if isinstance(units, int):
+            model.add(CuDNNLSTM(units))
+        else:
+            for unit in units:
+                model.add(CuDNNLSTM(unit))
     else:
-        for unit in units:
-            model.add(LSTM(unit))
+        if isinstance(units, int):
+            model.add(LSTM(units))
+        else:
+            for unit in units:
+                model.add(LSTM(unit))
 
     model.add(Dense(num_classes, activation='sigmoid'))
     return model
 
 
-def gru_model(units, input_shape=(1024,), num_classes=3862):
+def gru_model(units, input_shape=(1024,), num_classes=3862, gpu=False):
     """ Create a GRU model.
 
     Parameters
@@ -124,6 +134,9 @@ def gru_model(units, input_shape=(1024,), num_classes=3862):
         Input shape of the model
     num_classes: int
         Number of output classes.
+    gpu: bool
+        If GPU is enabled, then set this to true to use cuDNNLSTM
+        which is much faster.
 
     Returns
     -------
@@ -133,17 +146,24 @@ def gru_model(units, input_shape=(1024,), num_classes=3862):
 
     model = Sequential()
     model.add(Reshape((input_shape[0], 1), input_shape=input_shape))
-    if isinstance(units, int):
-        model.add(GRU(units))
+    if gpu:
+        if isinstance(units, int):
+            model.add(CuDNNGRU(units))
+        else:
+            for unit in units:
+                model.add(CuDNNGRU(unit))
     else:
-        for unit in units:
-            model.add(GRU(unit))
+        if isinstance(units, int):
+            model.add(GRU(units))
+        else:
+            for unit in units:
+                model.add(GRU(unit))
 
     model.add(Dense(num_classes, activation='sigmoid'))
     return model
 
 
-def create_model(units, choice='cnn', input_shape=(1024,), kernel_size=3, strides=1, pool=2):
+def create_model(units, choice='cnn', input_shape=(1024,), kernel_size=3, strides=1, pool=2, gpu=False):
     """ Create a model given the model choice. Pooling only effects
     CNN model.
 
@@ -163,6 +183,9 @@ def create_model(units, choice='cnn', input_shape=(1024,), kernel_size=3, stride
     pool: int
         Apply max pool after conv layer. Effects only cnn model. If 0 or <0
         then no pooling will be done.
+    gpu: bool
+        If GPU is enabled, then set this to true to use cuDNNLSTM
+        which is much faster.
 
     Returns
     -------
@@ -174,9 +197,9 @@ def create_model(units, choice='cnn', input_shape=(1024,), kernel_size=3, stride
         model = cnn_model(units=units, input_shape=input_shape,
                           kernel_size=kernel_size, strides=strides, pool=pool)
     elif choice is 'lstm':
-        model = lstm_model(units=units, input_shape=input_shape)
+        model = lstm_model(units=units, input_shape=input_shape, gpu=gpu)
     elif choice is 'gru':
-        model = gru_model(units=units, input_shape=input_shape)
+        model = gru_model(units=units, input_shape=input_shape, gpu=gpu)
     else:  # DNN model
         model = dnn_model(units=units, input_shape=input_shape)
 
@@ -188,7 +211,8 @@ def create_model(units, choice='cnn', input_shape=(1024,), kernel_size=3, stride
 def fine_tune_model(train_records, val_records, sel, parser='example',
                     train=True, repeats=1000, cores=4, batch_size=32,
                     buffer_size=1, num_classes=3862, units=None, choice='cnn',
-                    input_shape=(1024,), pooling=True, tensorboard=True):
+                    input_shape=(1024,), pool=2, kernel_size=3, strides=1,
+                    tensorboard=True, gpu=False):
     """
 
     Parameters
@@ -219,10 +243,18 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
         Available choices are cnn, lstm, gru and dnn.
     input_shape: tuple, list
         Input shape of the model
-    pooling: bool
-        Apply max pool after conv layer. Effects only cnn model
     tensorboard: bool
         Whether to output tensorboard logs. Default is true
+    gpu: bool
+        If GPU is enabled, then set this to true to use cuDNNLSTM
+        which is much faster.
+    kernel_size: int
+        Kernel size when choice is cnn
+    strides: int
+        Strides size when choice is cnn
+    pool: int
+        Apply max pool after conv layer. Effects only cnn model. If 0 or <0
+        then no pooling will be done.
 
     Returns
     -------
@@ -257,8 +289,9 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
                             batch_size=batch_size, buffer_size=buffer_size,
                             num_classes=num_classes)
 
-        model = create_model(units=unit, choice=choice,
-                             input_shape=input_shape, pooling=pooling)
+        model = create_model(units=unit, choice=choice, input_shape=input_shape,
+                             pool=pool, kernel_size=kernel_size, strides=strides,
+                             gpu=gpu)
         if tensorboard:
             model_format = {
                 'TYPE': choice.upper(),
