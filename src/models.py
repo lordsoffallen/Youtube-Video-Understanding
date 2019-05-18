@@ -110,13 +110,13 @@ def lstm_model(units, input_shape=(1024,), num_classes=3862, gpu=False):
             model.add(CuDNNLSTM(units))
         else:
             for unit in units:
-                model.add(CuDNNLSTM(unit))
+                model.add(CuDNNLSTM(unit, return_sequences=True))
     else:
         if isinstance(units, int):
             model.add(LSTM(units))
         else:
             for unit in units:
-                model.add(LSTM(unit))
+                model.add(LSTM(unit, return_sequences=True))
 
     model.add(Dense(num_classes, activation='sigmoid'))
     return model
@@ -151,13 +151,13 @@ def gru_model(units, input_shape=(1024,), num_classes=3862, gpu=False):
             model.add(CuDNNGRU(units))
         else:
             for unit in units:
-                model.add(CuDNNGRU(unit))
+                model.add(CuDNNGRU(unit, return_sequences=True))
     else:
         if isinstance(units, int):
             model.add(GRU(units))
         else:
             for unit in units:
-                model.add(GRU(unit))
+                model.add(GRU(unit, return_sequences=True))
 
     model.add(Dense(num_classes, activation='sigmoid'))
     return model
