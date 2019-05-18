@@ -306,7 +306,8 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
 
         model_history['model_' + str(c+1)] = history
         clear_session()
-        callbacks.remove(board)
+        if tensorboard:
+            callbacks.remove(board)
 
     return model_history
 
