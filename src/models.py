@@ -109,8 +109,8 @@ def lstm_model(units, input_shape=(1024,), num_classes=3862, gpu=False):
         if isinstance(units, int):
             model.add(CuDNNLSTM(units))
         else:
-            for unit in units:
-                if unit == units[-1]: # Last element. Return sequence is false
+            for c, unit in enumerate(units, start=1):
+                if c == len(units):  # Last element. Return sequence is false
                     model.add(CuDNNLSTM(unit))
                 else:
                     model.add(CuDNNLSTM(unit, return_sequences=True))
@@ -118,8 +118,8 @@ def lstm_model(units, input_shape=(1024,), num_classes=3862, gpu=False):
         if isinstance(units, int):
             model.add(LSTM(units))
         else:
-            for unit in units:
-                if unit == units[-1]:  # Last element. Return sequence is false
+            for c, unit in enumerate(units, start=1):
+                if c == len(units):  # Last element. Return sequence is false
                     model.add(LSTM(unit))
                 else:
                     model.add(LSTM(unit, return_sequences=True))
@@ -156,8 +156,8 @@ def gru_model(units, input_shape=(1024,), num_classes=3862, gpu=False):
         if isinstance(units, int):
             model.add(CuDNNGRU(units))
         else:
-            for unit in units:
-                if unit == units[-1]:  # Last element. Return sequence is false
+            for c, unit in enumerate(units, start=1):
+                if c == len(units):  # Last element. Return sequence is false
                     model.add(CuDNNGRU(unit))
                 else:
                     model.add(CuDNNGRU(unit, return_sequences=True))
@@ -165,8 +165,8 @@ def gru_model(units, input_shape=(1024,), num_classes=3862, gpu=False):
         if isinstance(units, int):
             model.add(GRU(units))
         else:
-            for unit in units:
-                if unit == units[-1]:
+            for c, unit in enumerate(units, start=1):
+                if c == len(units):  # Last element. Return sequence is false
                     model.add(GRU(unit))
                 else:
                     model.add(GRU(unit, return_sequences=True))
