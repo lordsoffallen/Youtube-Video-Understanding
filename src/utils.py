@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pickle
 
 
-def plot_loss(choice, sel, legends, loc='upper left'):
+def plot_loss(choice, sel, legends, loc='upper right'):
     """ Plots validation loss and training loss together.
 
     Parameters
@@ -118,17 +118,13 @@ def plot_acc(choice, sel, legends, loc='upper left'):
     plt.show()
 
 
-def plot_params(choice, sel, legends, loc='upper left'):
+def plot_params(choice):
     """ Plots parameter number with models together.
 
     Parameters
     ----------
     choice: dict
         A dict contains different models
-    legends: list
-        A list contains plot legends
-    loc: str
-        Legend position. Default is upper left.
     """
 
     plt.figure(figsize=(16, 8))
@@ -138,7 +134,6 @@ def plot_params(choice, sel, legends, loc='upper left'):
     plt.tick_params(axis='x', rotation=45)
     plt.ylabel('Count')
     plt.xlabel('Model Type')
-    plt.legend(legends, loc=loc)
     plt.show()
 
 

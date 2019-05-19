@@ -6,6 +6,8 @@ utils/.ipynb_checkpoints
 
 .idea/
 
+test.py
+
 logs/
 
 utils/_pycache__/
