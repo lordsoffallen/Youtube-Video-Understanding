@@ -8,6 +8,8 @@ parser.add_argument('--train_records', type=str, default='video/',
                     help='Path to train record files folder. Add backslash at the end!')
 parser.add_argument('--val_records', type=str, default='video/',
                     help='Path to val record files folder.Add backslash at the end!')
+parser.add_argument('--steps_per_epoch', type=int, default=60,
+                    help='Steps per epoch is number of samples / batch size')
 parser.add_argument('--cores', type=int, default=2,
                     help='Number of CPU cores available to use')
 parser.add_argument('--tensorboard', type=bool, default=False,
@@ -22,7 +24,8 @@ args = parser.parse_args()
 
 
 def fine_tune_rgb(train_records, val_records, units, cores=2, tensorboard=False,
-                  gpu=True, repeats=None, fname='rgb_results.pickle'):
+                  gpu=True, repeats=None, steps_per_epoch=60,
+                  fname='rgb_results.pickle'):
     """ Fine tunes different models on rgb values and dumps the results as a pickle
     object to read later.
 
@@ -43,6 +46,8 @@ def fine_tune_rgb(train_records, val_records, units, cores=2, tensorboard=False,
         which is much faster.
     repeats: int
         How many times to iterate over the data
+    step_per_epoch: int
+        Number of steps required to complete one training part.
     fname: str
         File name of the file to save.
     """
@@ -50,6 +55,7 @@ def fine_tune_rgb(train_records, val_records, units, cores=2, tensorboard=False,
     dnn_rgb, dnn_rgb_params = fine_tune_model(train_records=train_records,
                                               val_records=val_records,
                                               sel='rgb',
+                                              steps_per_epoch=steps_per_epoch,
                                               repeats=repeats,
                                               cores=cores,
                                               choice='dnn',
@@ -58,6 +64,7 @@ def fine_tune_rgb(train_records, val_records, units, cores=2, tensorboard=False,
     cnn_rgb, cnn_rgb_params = fine_tune_model(train_records=train_records,
                                               val_records=val_records,
                                               sel='rgb',
+                                              steps_per_epoch=steps_per_epoch,
                                               repeats=repeats,
                                               cores=cores,
                                               choice='cnn',
@@ -68,6 +75,7 @@ def fine_tune_rgb(train_records, val_records, units, cores=2, tensorboard=False,
     lstm_rgb, lstm_rgb_params = fine_tune_model(train_records=train_records,
                                                 val_records=val_records,
                                                 sel='rgb',
+                                                steps_per_epoch=steps_per_epoch,
                                                 repeats=repeats,
                                                 cores=cores,
                                                 choice='lstm',
@@ -78,6 +86,7 @@ def fine_tune_rgb(train_records, val_records, units, cores=2, tensorboard=False,
     gru_rgb, gru_rgb_params = fine_tune_model(train_records=train_records,
                                               val_records=val_records,
                                               sel='rgb',
+                                              steps_per_epoch=steps_per_epoch,
                                               repeats=repeats,
                                               cores=cores,
                                               choice='gru',
@@ -91,7 +100,8 @@ def fine_tune_rgb(train_records, val_records, units, cores=2, tensorboard=False,
 
 
 def fine_tune_audio(train_records, val_records, units, cores=2, tensorboard=False,
-                    gpu=True, repeats=None, fname='audio_results.pickle'):
+                    gpu=True, repeats=None, steps_per_epoch=60,
+                    fname='audio_results.pickle'):
     """ Fine tunes different models on audio values and dumps the results as a pickle
     object to read later.
 
@@ -112,6 +122,8 @@ def fine_tune_audio(train_records, val_records, units, cores=2, tensorboard=Fals
         which is much faster.
     repeats: int
         How many times to iterate over the data
+    steps_per_epoch: int
+        Number of steps required to complete one training part.
     fname: str
         File name of the file to save.
     """
@@ -119,6 +131,7 @@ def fine_tune_audio(train_records, val_records, units, cores=2, tensorboard=Fals
     dnn_audio, dnn_audio_params = fine_tune_model(train_records=train_records,
                                                   val_records=val_records,
                                                   sel='audio',
+                                                  steps_per_epoch=steps_per_epoch,
                                                   input_shape=(128,),
                                                   repeats=repeats,
                                                   cores=cores,
@@ -128,6 +141,7 @@ def fine_tune_audio(train_records, val_records, units, cores=2, tensorboard=Fals
     cnn_audio, cnn_audio_params = fine_tune_model(train_records=train_records,
                                                   val_records=val_records,
                                                   sel='audio',
+                                                  steps_per_epoch=steps_per_epoch,
                                                   input_shape=(128,),
                                                   repeats=repeats,
                                                   cores=cores,
@@ -139,6 +153,7 @@ def fine_tune_audio(train_records, val_records, units, cores=2, tensorboard=Fals
     lstm_audio, lstm_audio_params = fine_tune_model(train_records=train_records,
                                                     val_records=val_records,
                                                     sel='audio',
+                                                    steps_per_epoch=steps_per_epoch,
                                                     input_shape=(128,),
                                                     repeats=repeats,
                                                     cores=cores,
@@ -150,6 +165,7 @@ def fine_tune_audio(train_records, val_records, units, cores=2, tensorboard=Fals
     gru_audio, gru_audio_params = fine_tune_model(train_records=train_records,
                                                   val_records=val_records,
                                                   sel='audio',
+                                                  steps_per_epoch=steps_per_epoch,
                                                   input_shape=(128,),
                                                   repeats=repeats,
                                                   cores=cores,
@@ -173,11 +189,11 @@ if __name__ == '__main__':
 
     fine_tune_rgb(train_records=train, val_records=val, units=units_cnn_lstm_gru,
                   cores=args.cores, tensorboard=args.tensorboard, gpu=args.gpu,
-                  repeats=None, fname=args.rgb_file_name)
+                  repeats=None, steps_per_epoch=args.steps_per_epoch, fname=args.rgb_file_name)
 
     fine_tune_audio(train_records=train, val_records=val, units=units_cnn_lstm_gru,
                     cores=args.cores, tensorboard=args.tensorboard, gpu=args.gpu,
-                    repeats=None, fname=args.audio_file_name)
+                    repeats=None, steps_per_epoch=args.steps_per_epoch, fname=args.audio_file_name)
 
 
 
