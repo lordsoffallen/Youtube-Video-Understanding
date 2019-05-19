@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import json
+import pickle
 
 
 def plot_loss(choice, legends, loc='upper left'):
@@ -87,8 +87,8 @@ def plot_acc(choice, legends, loc='upper left'):
     plt.show()
 
 
-def dump_results(models, params, fname='results.json'):
-    """ Dumps the results into a json object.
+def dump_results(models, params, fname='results.pickle'):
+    """ Dumps the results into a pickle object.
 
     Parameters
     ----------
@@ -110,9 +110,9 @@ def dump_results(models, params, fname='results.json'):
 
         accs[name + 'VAL_TOP1_ACC'] = model.history['val_top1_acc']
         accs[name + 'VAL_TOP5_ACC'] = model.history['val_top5_acc']
-        accs[name + 'TOP1_ACC'] = model.history['top1_ccc']
+        accs[name + 'TOP1_ACC'] = model.history['top1_acc']
         accs[name + 'TOP5_ACC'] = model.history['top5_acc']
 
     dump = {'losses' : losses, 'accs': accs, 'params': params}
-    with open(fname, 'w') as f:
-        json.dump(dump, f)
+    with open(fname, 'wb') as f:
+        pickle.dump(dump, f)
