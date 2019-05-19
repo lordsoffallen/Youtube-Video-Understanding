@@ -270,8 +270,8 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
 
     Returns
     -------
-    model_history:
-        A dict contains model history objects.
+    model_history, param_history: dict, dict
+        A tuple of dict contains model history objects and parameter counts.
 
     """
 
@@ -287,10 +287,11 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
 
     layer_units = _units if units is None else units
     model_history = {}
+    param_history = {}
     stop = EarlyStopping(patience=3)
     callbacks = [stop]
 
-    for c, unit in enumerate(layer_units):
+    for c, unit in enumerate(layer_units, start=1):
         train_data = get_data(records=train_records, sel=sel, parser=parser,
                               train=train, repeats=repeats, cores=cores,
                               batch_size=batch_size, buffer_size=buffer_size,
@@ -304,11 +305,12 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
         model = create_model(units=unit, choice=choice, input_shape=input_shape,
                              pool=pool, kernel_size=kernel_size, strides=strides,
                              gpu=gpu)
+        model_format = {
+            'TYPE': choice.upper(),
+            'LOOPS': c}
+        MODEL_NAME = '{TYPE}_{LOOPS}'.format(**model_format)
+
         if tensorboard:
-            model_format = {
-                'TYPE': choice.upper(),
-                'LOOPS': c}
-            MODEL_NAME = '{TYPE}_{LOOPS}'.format(**model_format)
             board = TensorBoard(log_dir='./logs/{}'.format(MODEL_NAME))
             callbacks.append(board)
 
@@ -316,10 +318,11 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
                             validation_data=val_data, validation_steps=8,
                             verbose=0, callbacks=callbacks)
 
-        model_history['model_' + str(c+1)] = history
+        model_history[MODEL_NAME] = history
+        param_history[MODEL_NAME + 'PARAMS'] = model.count_params()
         clear_session()
         if tensorboard:
             callbacks.remove(board)
 
-    return model_history
+    return model_history, param_history
 
