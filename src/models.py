@@ -290,7 +290,7 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
     layer_units = _units if units is None else units
     model_history = {}
     param_history = {}
-    stop = EarlyStopping(patience=3)
+    stop = EarlyStopping(patience=5)
     callbacks = [stop]
 
     for c, unit in enumerate(layer_units, start=1):
