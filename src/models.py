@@ -220,11 +220,10 @@ def create_model(units, choice='cnn', input_shape=(1024,), kernel_size=3, stride
     return model
 
 
-def fine_tune_model(train_records, val_records, sel, parser='example',
-                    train=True, steps_per_epoch=150, repeats=1000, cores=4,
-                    batch_size=32, buffer_size=1, num_classes=3862, units=None,
-                    choice='cnn', input_shape=(1024,), pool=2, kernel_size=3,
-                    strides=1, tensorboard=True, gpu=False):
+def fine_tune_model(train_records, val_records, sel, parser='example', train=True, steps_per_epoch=150,
+                    validation_steps=8, repeats=1000, cores=4, batch_size=32, buffer_size=1, num_classes=3862,
+                    units=None, choice='cnn', input_shape=(1024,), pool=2, kernel_size=3, strides=1,
+                    tensorboard=True, gpu=False):
     """
 
     Parameters
@@ -241,6 +240,8 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
         If True returns features, labels. Otherwise returns just features
     steps_per_epoch: int
         Number of steps required to complete one training part.
+    validation_steps: int
+        Number of steps required to complete validation part.
     repeats: int
         How many times to iterate over the data
     cores: int
@@ -317,7 +318,7 @@ def fine_tune_model(train_records, val_records, sel, parser='example',
             callbacks.append(board)
 
         history = model.fit(x=train_data, steps_per_epoch=steps_per_epoch, epochs=20,
-                            validation_data=val_data, validation_steps=8,
+                            validation_data=val_data, validation_steps=validation_steps,
                             verbose=0, callbacks=callbacks)
 
         model_history[MODEL_NAME] = history
