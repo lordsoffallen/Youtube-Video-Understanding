@@ -12,6 +12,7 @@ parser.add_argument('--model', type=str, default='dnn', help='Model type. Option
 parser.add_argument('--units', type=int, default=256, help='Unit size parameter for the model.')
 parser.add_argument('--feature', type=str, default='rgb', choices=['audio', 'rgb'],
                     help='Which feature to use when training the model')
+parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--steps_per_epoch', type=int, default=60,
                     help='Steps per epoch is number of samples / batch size')
 parser.add_argument('--validation_steps', type=int, default=60,
