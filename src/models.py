@@ -393,8 +393,8 @@ def train_model(train_records, val_records, sel, units, parser='example', train=
 
     model_history = {}
     param_history = {}
-    stop = EarlyStopping(patience=5)
-    filepath = "model-weights-{epoch:02d}-{val_acc:.2f}.hdf5"
+    stop = EarlyStopping(patience=3)
+    filepath = "model-weights-{epoch:02d}.hdf5"
     checkpoint = ModelCheckpoint(filepath, verbose=1, save_best_only=True)
     callbacks = [stop, checkpoint]
 

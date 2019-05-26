@@ -23,10 +23,6 @@ parser.add_argument('--tensorboard', type=bool, default=False,
                     help='Dump tensorboard log files  to current directory')
 parser.add_argument('--gpu', type=bool, default=True,
                     help='Use NVIDIA GPU if available')
-parser.add_argument('--rgb_file_name', type=str, default='rgb_results.pickle',
-                    help='File name of the rgb results.')
-parser.add_argument('--audio_file_name', type=str, default='audio_results.pickle',
-                    help='File name of the audio results.')
 args = parser.parse_args()
 
 
