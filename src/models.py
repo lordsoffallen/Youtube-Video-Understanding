@@ -3,7 +3,7 @@ from .data import get_data
 from tensorflow.python.keras import Model, Sequential
 from tensorflow.python.keras.layers import Dense, Flatten, LSTM, GRU, Reshape
 from tensorflow.python.keras.layers import Conv1D, MaxPooling1D, CuDNNLSTM, CuDNNGRU
-from tensorflow.python.keras.callbacks import EarlyStopping, TensorBoard
+from tensorflow.python.keras.callbacks import EarlyStopping, TensorBoard, ModelCheckpoint
 from tensorflow.python.keras.backend import clear_session
 
 
@@ -329,3 +329,98 @@ def fine_tune_model(train_records, val_records, sel, parser='example', train=Tru
 
     return model_history, param_history
 
+
+def train_model(train_records, val_records, sel, units, parser='example', train=True, steps_per_epoch=150,
+                validation_steps=8, repeats=None, cores=4, batch_size=32, buffer_size=1, num_classes=3862,
+                choice='cnn', input_shape=(1024,), pool=2, kernel_size=3, strides=1, tensorboard=True, gpu=False):
+    """
+
+    Parameters
+    ----------
+    train_records: str
+        A list of strings of TFRecord train file names
+    val_records: str
+        A list of strings of TFRecord validation file names
+    sel: str
+        A feature selection for the data. Options are 'rgb', 'audio', all
+    units: int, list
+        Number of units in each layer
+    parser: str
+        Select sequence or example data. Options are 'example' and 'sequence'
+    train: bool
+        If True returns features, labels. Otherwise returns just features
+    steps_per_epoch: int
+        Number of steps required to complete one training part.
+    validation_steps: int
+        Number of steps required to complete validation part.
+    repeats: int
+        How many times to iterate over the data
+    cores: int
+        Number of parallel jobs for mapping function.
+    batch_size: int
+        Number of batch size
+    buffer_size: int
+        A prefetch buffer size to speed up to parallelism
+    num_classes: int
+        Number of output classes. Default values is 3862
+    choice: str
+        Available choices are cnn, lstm, gru and dnn.
+    input_shape: tuple, list
+        Input shape of the model
+    tensorboard: bool
+        Whether to output tensorboard logs. Default is true
+    gpu: bool
+        If GPU is enabled, then set this to true to use cuDNNLSTM
+        which is much faster.
+    kernel_size: int
+        Kernel size when choice is cnn
+    strides: int
+        Strides size when choice is cnn
+    pool: int
+        Apply max pool after conv layer. Effects only cnn model. If 0 or <0
+        then no pooling will be done.
+
+    Returns
+    -------
+    model_history, param_history: dict, dict
+        A tuple of dict contains model history objects and parameter counts.
+
+    """
+
+    if choice not in ['cnn', 'dnn']:
+        raise ('Selected model is not supported yet. \
+                Please select a valid model')
+
+    model_history = {}
+    param_history = {}
+    stop = EarlyStopping(patience=5)
+    filepath = "model-weights-{epoch:02d}-{val_acc:.2f}.hdf5"
+    checkpoint = ModelCheckpoint(filepath, verbose=1, save_best_only=True)
+    callbacks = [stop, checkpoint]
+
+    train_data = get_data(records=train_records, sel=sel, parser=parser,
+                          train=train, repeats=repeats, cores=cores,
+                          batch_size=batch_size, buffer_size=buffer_size,
+                          num_classes=num_classes)
+
+    val_data = get_data(records=val_records, sel=sel, parser=parser,
+                        train=train, repeats=repeats, cores=cores,
+                        batch_size=batch_size, buffer_size=buffer_size,
+                        num_classes=num_classes)
+
+    model = create_model(units=units, choice=choice, input_shape=input_shape,
+                         pool=pool, kernel_size=kernel_size, strides=strides,
+                         gpu=gpu)
+
+    if tensorboard:
+        board = TensorBoard(log_dir='./logs/{}'.format(choice.upper()))
+        callbacks.append(board)
+
+    history = model.fit(x=train_data, steps_per_epoch=steps_per_epoch, epochs=300,
+                        validation_data=val_data, validation_steps=validation_steps,
+                        verbose=1, callbacks=callbacks)
+
+    model_history[choice.upper()] = history
+    param_history[choice.upper() + '_PARAMS'] = model.count_params()
+
+    return model_history, param_history

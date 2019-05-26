@@ -234,9 +234,9 @@ def get_data(records, sel, parser='example', train=True, repeats=1000,
         func = lambda x: _parser_sequence(record=x, sel=sel, train=train, num_classes=num_classes)
 
     if train:
-        dataset = (dataset.map(map_func=func, num_parallel_calls=cores)
-                          .repeat(repeats)  # TODO Change the order here later!!!!
-                          .shuffle(buffer_size=1000)
+        dataset = (dataset.shuffle(buffer_size=1000)
+                          .repeat(repeats)
+                          .map(map_func=func, num_parallel_calls=cores)
                           .batch(batch_size)
                           .prefetch(buffer_size))
     else:
