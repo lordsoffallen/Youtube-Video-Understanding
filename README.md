@@ -1,6 +1,6 @@
 # Youtube Video Understanding 
 
-When having issues with GitHub ipynb notebook viewing, please visit this [link](https://nbviewer.jupyter.org/github/lordsoffallen/youtube-video-understanding/blob/master/Youtube%20Data%20Analytics.ipynb) for Youtube Analytics, this [link](https://nbviewer.jupyter.org/github/lordsoffallen/youtube-video-understanding/blob/master/Simple%20Models.ipynb) for simple models.
+When having issues with GitHub ipynb notebook viewing, please visit this [link](https://nbviewer.jupyter.org/github/lordsoffallen/youtube-video-understanding/blob/master/Youtube%20Data%20Analytics.ipynb) for Youtube Analytics, this [link](https://nbviewer.jupyter.org/github/lordsoffallen/youtube-video-understanding/blob/master/Model%20Analysis%20v1.ipynb) for Model analysis v1 and this [link](https://nbviewer.jupyter.org/github/lordsoffallen/youtube-video-understanding/blob/master/Model%20Analysis%20v2.ipynb) for v2.
 
 ## Finding steps_per_epoch parameter value
 ```
