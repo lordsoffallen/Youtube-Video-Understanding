@@ -14,3 +14,10 @@ print('Steps_per_epoch should be length of data / batch size.')
 print('In this case, we can choose : {} / {} (default batch_size) =~ {}'\
       .format(min(file_lens), 32, round(min(file_lens)/32)))
 ```
+
+# Paper Links
+
+[Google Original Paper](https://arxiv.org/pdf/1609.08675.pdf)
+[1](http://cs231n.stanford.edu/reports/2017/pdfs/702.pdf)  
+[2](http://cs231n.stanford.edu/reports/2017/pdfs/711.pdf)  
+[3](http://cs231n.stanford.edu/reports/2017/pdfs/705.pdf)  
