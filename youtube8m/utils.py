@@ -134,8 +134,11 @@ def dump_results(models, params, fname='results.pickle'):
         losses[name + '_VAL_LOSS'] = model.history['val_loss']
         losses[name + '_LOSS'] = model.history['loss']
 
-        accs[name + '_VAL_TOP5_ACC'] = model.history['val_top5_acc']
-        accs[name + '_TOP5_ACC'] = model.history['top5_acc']
+        accs[name + '_VAL_HIT1'] = model.history['val_hit1']
+        accs[name + '_HIT1'] = model.history['hit1']
+
+        accs[name + '_VAL_HIT3'] = model.history['val_hit3']
+        accs[name + '_HIT3'] = model.history['hit3']
 
     dump = {'losses' : losses, 'accs': accs, 'params': params}
     with open(fname, 'wb') as f:

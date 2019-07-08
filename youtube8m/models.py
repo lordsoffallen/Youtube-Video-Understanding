@@ -1,7 +1,7 @@
 from tensorflow.python.keras import Model, Sequential, Input
 from tensorflow.python.keras.backend import sum
 from tensorflow.python.keras.layers import Dense, Flatten, LSTM, GRU, Activation, Dropout
-from tensorflow.python.keras.layers import Conv1D, MaxPooling1D, CuDNNLSTM, CuDNNGRU
+from tensorflow.python.keras.layers import Conv1D, MaxPooling1D, CuDNNLSTM, CuDNNGRU, GlobalAveragePooling1D
 from tensorflow.python.keras.layers import BatchNormalization, Add, Reshape, Multiply, Lambda
 from tensorflow.python.keras.regularizers import l2
 
@@ -13,6 +13,9 @@ class BaseModel(object):
 
 class MLPModel(BaseModel):
     """Create a Multi Layer Perceptron model. Use create() to build the model
+
+    Note that it is not possible to add batch normalization and dropout
+    at the same time.
 
     Parameters
     ----------
@@ -42,8 +45,8 @@ class MLPModel(BaseModel):
     def __init__(self, units,
                  include_top=True,
                  last_activation='sigmoid',
-                 batch_normalization=False,
-                 kernel_regularizer=l2(1e-8),
+                 batch_normalization=True,
+                 kernel_regularizer=l2(1e-6),
                  dropout=False,
                  summary=False,
                  input_shape=(1024,),
@@ -161,7 +164,8 @@ class ResNetModel(BaseModel):
     include_top: bool
         If true, adds the classification layer using number of classes
     last_activation: str
-        Only used when include_top is true. Defines last layer activation
+        Only used when include_top is true. Defines last layer activation.
+        Sigmoid performed better than softmax.
     kernel_regularizer:
         Kernel weights regularizer
     summary: bool
@@ -174,7 +178,7 @@ class ResNetModel(BaseModel):
 
     def __init__(self, units=None,
                  include_top=True,
-                 last_activation='softmax',
+                 last_activation='sigmoid',
                  kernel_regularizer=l2(1e-8),
                  summary=False,
                  input_shape=(1024,),
@@ -193,14 +197,13 @@ class ResNetModel(BaseModel):
         self.num_classes = num_classes
 
     def _residual_block(self, input_tensor, u1, u2, u3):
-        # TODO Investigate the order of relu and batchnorm
         i = Dense(u1, kernel_regularizer=self.kernel_regularizer)(input_tensor)
-        i = Activation('relu')(i)
         i = BatchNormalization()(i)
+        i = Activation('relu')(i)
 
         i = Dense(u2, kernel_regularizer=self.kernel_regularizer)(i)
-        i = Activation('relu')(i)
         i = BatchNormalization()(i)
+        i = Activation('relu')(i)
 
         i = Dense(u3, kernel_regularizer=self.kernel_regularizer)(i)
         o = Add()([i, input_tensor])
@@ -221,17 +224,17 @@ class ResNetModel(BaseModel):
         u3 = self.units[2]
 
         x = self._residual_block(inputs, u1, u1, last_dim)
-        x = Activation('relu')(x)
         x = BatchNormalization()(x)
+        x = Activation('relu')(x)
 
         x = self._residual_block(x, u2, u2, last_dim)
-        x = Activation('relu')(x)
         x = BatchNormalization()(x)
+        x = Activation('relu')(x)
 
         x = self._residual_block(x, u3, u3, last_dim)
         x = Activation('relu')(x)
 
-        if self.include_top:    # TODO check sigmoid activation
+        if self.include_top:
             x = Dense(self.num_classes,
                       activation=self.last_activation,
                       kernel_regularizer=self.kernel_regularizer)(x)
@@ -325,6 +328,9 @@ class CNNModel(BaseModel):
     """Create a Convolutional Neural Network model. Stackes Conv1D with
     pool layers (if given) together. Use create() to build the model
 
+    Note that it is not possible to add batch normalization and dropout
+    at the same time.
+
     Parameters
     ----------
     filters: int, list
@@ -358,7 +364,7 @@ class CNNModel(BaseModel):
 
     def __init__(self, filters,
                  kernel_size=3,
-                 strides=1,
+                 strides=2,
                  pool=2,
                  include_top=True,
                  last_activation='sigmoid',
@@ -400,16 +406,14 @@ class CNNModel(BaseModel):
                              strides=self.strides,
                              padding='valid',
                              activation='relu',
-                             input_shape=self.input_shape,
                              kernel_regularizer=self.kernel_regularizer))
             if self.pool > 0:
                 model.add(MaxPooling1D(self.pool))
         else:
-            for filter in self.filters:
+            for c, filter in enumerate(self.filters, start=1):
                 model.add(Conv1D(filter, self.kernel_size,
                                  strides=self.strides,
                                  padding='valid',
-                                 input_shape=self.input_shape,
                                  kernel_regularizer=self.kernel_regularizer))
                 if self.batch_normalization:
                     model.add(BatchNormalization())
@@ -420,10 +424,10 @@ class CNNModel(BaseModel):
                 else:
                     model.add(Activation('relu'))
 
-                if self.pool > 0:
+                if self.pool > 0 and len(self.filters) != c:
                     model.add(MaxPooling1D(self.pool))
 
-        model.add(Flatten())
+        model.add(GlobalAveragePooling1D())
         if self.include_top:
             model.add(Dense(self.num_classes,
                             activation=self.last_activation,
@@ -436,6 +440,9 @@ class CNNModel(BaseModel):
 class RNNModel(BaseModel):
     """Create a Recurrent Neural Network model. Stackes either LSTM or
      GRU cells together. Use create() to build the model
+
+     Note that it is not possible to add batch normalization and dropout
+    at the same time.
 
     Parameters
     ----------
@@ -489,13 +496,16 @@ class RNNModel(BaseModel):
         self.input_shape = input_shape
         self.num_classes = num_classes
 
+        if self.cell_type not in ['lstm', 'gru']:
+            raise ValueError('Specified type -{}- is not available for RNN model.'.format(self.cell_type))
+
         if self.gpu:
-            if self.cell_type is 'lstm':
+            if self.cell_type == 'lstm':
                 self.LAYER_TYPE = CuDNNLSTM
             else:
                 self.LAYER_TYPE = CuDNNGRU
         else:
-            if self.cell_type is 'lstm':
+            if self.cell_type == 'lstm':
                 self.LAYER_TYPE = LSTM
             else:
                 self.LAYER_TYPE = GRU

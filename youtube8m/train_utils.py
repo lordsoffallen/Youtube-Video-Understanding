@@ -2,22 +2,29 @@ from tensorflow.python.keras.metrics import MeanMetricWrapper
 import tensorflow as tf
 
 
-def hamming_loss(y_true, y_pred, mode='multilabel'):
-    if mode not in ['multiclass', 'multilabel']:
-        raise TypeError('mode must be: [None, multilabel])')
-
-    if mode == 'multiclass':
-        nonzero = tf.cast(tf.count_nonzero(y_true * y_pred, axis=-1), tf.float32)
-        return 1.0 - nonzero
-
-    else:
-        nonzero = tf.cast(tf.count_nonzero(y_true - y_pred, axis=-1), tf.float32)
-        return nonzero / y_true.get_shape()[-1]
+# TODO Something happened with hamming. It throws an error now.
+def hamming_loss(y_true, y_pred):
+    nonzero = tf.cast(tf.count_nonzero(y_true - y_pred, axis=-1), tf.float32)
+    return nonzero / y_true.get_shape()[-1]
 
 
 class HammingLoss(MeanMetricWrapper):
-    def __init__(self, name='hamming_loss', dtype=None, mode='multilabel'):
-        super(HammingLoss, self).__init__(hamming_loss, name, dtype=dtype, mode=mode)
+    def __init__(self, name='hamming_loss', dtype=None):
+        super(HammingLoss, self).__init__(hamming_loss, name, dtype=dtype)
+
+
+def hit_at_one(y_true, y_pred, batch_size=32):
+    top_prediction = tf.math.argmax(y_pred, axis=1, output_type=tf.int32)
+    hits = tf.gather_nd(y_true, tf.stack([tf.range(batch_size), top_prediction], axis=1))
+    return tf.reduce_mean(hits)
+
+
+def hit_at_n(y_true, y_pred, batch_size=32, n=3):
+    _, top_prediction = tf.math.top_k(y_pred, k=n)
+    top_prediction = tf.reshape(top_prediction, [batch_size*n])
+    repeated_batch = tf.keras.backend.repeat_elements(tf.range(batch_size), n, axis=0)
+    hits = tf.gather_nd(y_true, tf.stack([repeated_batch, top_prediction], axis=1))
+    return tf.reduce_mean(tf.cast(hits, tf.float32))
 
 
 def find_steps_per_epoch(files_list, batch_size):

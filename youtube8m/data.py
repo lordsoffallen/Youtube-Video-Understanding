@@ -15,7 +15,8 @@ class Youtube8mData:
     feature: str
        A feature selection for the data. Options are 'rgb', 'audio', all
     merged: bool
-        If true, return merged rgb and audio features
+        If true, return merged rgb and audio features. Valid if feature is all.
+        Otherwise ignored.
     parser_fn: str
        Select sequence or example data. Options are 'example' and 'sequence'
     train: bool
@@ -122,10 +123,6 @@ class Youtube8mData:
         ----------
         features: Tensor
             Raw feature values
-        feature_size: int
-            Length of each frame feature vector
-        max_frames: int
-            Number of frames (rows) in the output feature_matrix
         max_quantized_value: int
             Maximum of the quantized value.
         min_quantized_value: int
@@ -165,17 +162,17 @@ class Youtube8mData:
         """
 
         context_features = {
-            'id': tf.FixedLenFeature([], tf.string),
-            "labels": tf.VarLenFeature(tf.int64)
+            'id': tf.io.FixedLenFeature([], tf.string),
+            "labels": tf.io.VarLenFeature(tf.int64)
         }
         sequence_features = {
-            'rgb': tf.FixedLenSequenceFeature([], tf.string),
-            'audio': tf.FixedLenSequenceFeature([], tf.string)
+            'rgb': tf.io.FixedLenSequenceFeature([], tf.string),
+            'audio': tf.io.FixedLenSequenceFeature([], tf.string)
         }
 
-        context, features = tf.parse_single_sequence_example(serialized=record,
-                                                             context_features=context_features,
-                                                             sequence_features=sequence_features)
+        context, features = tf.io.parse_single_sequence_example(serialized=record,
+                                                                context_features=context_features,
+                                                                sequence_features=sequence_features)
 
         if self._train:
             if self._one_hot:  # Conver to one-hot encoded tensors
@@ -206,12 +203,12 @@ class Youtube8mData:
         """
 
         feature_map = {
-            "mean_rgb": tf.FixedLenFeature([1024], tf.float32),
-            "mean_audio": tf.FixedLenFeature([128], tf.float32),
-            "labels": tf.VarLenFeature(tf.int64)
+            "mean_rgb": tf.io.FixedLenFeature([1024], tf.float32),
+            "mean_audio": tf.io.FixedLenFeature([128], tf.float32),
+            "labels": tf.io.VarLenFeature(tf.int64)
         }
 
-        parsed = tf.parse_single_example(record, feature_map)
+        parsed = tf.io.parse_single_example(record, feature_map)
 
         if self._train:
             if self._one_hot: # Conver to one-hot encoded tensors

@@ -5,7 +5,6 @@ logs/
 video/
 youtube8m/__pycache__/
 temp.py
-fine_tune_inference.py
 eval_inference.py
 model_analysis/
 pickles/
