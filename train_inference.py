@@ -111,8 +111,8 @@ if __name__ == '__main__':
                   num_classes=3862, merged=True, one_hot=True)
 
     # Construct the train and validation datasets
-    train_data = Youtube8mData(train_records, args.feature, **kwargs).get_data()
-    val_data = Youtube8mData(val_records, args.feature, **kwargs).get_data()
+    train_data = Youtube8mData(train_records, feature=args.feature, **kwargs).get_data()
+    val_data = Youtube8mData(val_records, feature=args.feature, **kwargs).get_data()
 
     # Parse model argument
     if args.model is 'moe' and args.checkpoint:

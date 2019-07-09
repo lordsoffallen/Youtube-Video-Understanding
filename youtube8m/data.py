@@ -180,7 +180,7 @@ class Youtube8mData:
             else:  # Sparse tensors
                 y = tf.sort(context["labels"].values)
 
-            if (self._feature is 'rgb') or (self._feature is 'audio'):
+            if (self._feature == 'rgb') or (self._feature == 'audio'):
                 x = self._get_video_matrix(features[self._feature], )
                 return x, y
             else:
@@ -216,7 +216,7 @@ class Youtube8mData:
             else:   # Sparse tensors
                 y = tf.sort(parsed["labels"].values)
 
-            if (self._feature is 'rgb') or (self._feature is 'audio'):
+            if (self._feature == 'rgb') or (self._feature == 'audio'):
                 return parsed['mean_' + self._feature], y
             elif self._merged:   # check if we want to merge features together
                 return tf.concat([parsed['mean_rgb'], parsed['mean_audio']], axis=0), y
@@ -224,7 +224,7 @@ class Youtube8mData:
                 return {'rgb': parsed['mean_rgb'], 'audio': parsed['mean_audio']}, y
 
         else:     # Eval or Test mode. Skipping label values
-            if (self._feature is 'rgb') or (self._feature is 'audio'):
+            if (self._feature == 'rgb') or (self._feature == 'audio'):
                 return parsed['mean_' + self._feature],
             elif self._merged:   # check if we want to merge features together
                 return tf.concat([parsed['mean_rgb'], parsed['mean_audio']], axis=0)
@@ -242,7 +242,7 @@ class Youtube8mData:
 
         dataset = tf.data.TFRecordDataset(self._records)
 
-        if self._parser_fn is 'example':
+        if self._parser_fn == 'example':
             func = self._parser_example
         else:
             func = self._parser_sequence
