@@ -113,7 +113,7 @@ def plot_params(choice):
     plt.show()
 
 
-def dump_results(models, params, fname='results.pickle'):
+def dump_results(models, params, fname='results.pkl'):
     """ Dumps the results into a pickle object.
 
     Parameters
@@ -140,6 +140,6 @@ def dump_results(models, params, fname='results.pickle'):
         accs[name + '_VAL_HIT3'] = model.history['val_hit3']
         accs[name + '_HIT3'] = model.history['hit3']
 
-    dump = {'losses' : losses, 'accs': accs, 'params': params}
+    dump = {'losses': losses, 'accs': accs, 'params': params}
     with open(fname, 'wb') as f:
         pickle.dump(dump, f)

@@ -42,8 +42,8 @@ parser.add_argument('-f', '--feature', type=str, default='rgb', choices=['audio'
 
 parser.add_argument('-b', '--batch_size', type=int, default=32, help='Default batch size is 32')
 
-parser.add_argument('-c', '--cores', type=int, default=4,
-                    help='Number of CPU cores available to use. Default is 4')
+parser.add_argument('-c', '--cores', type=int, default=2,
+                    help='Number of CPU cores available to use. Default is 2')
 
 parser.add_argument('--steps_per_epoch', type=int, default=0,
                     help='Steps per epoch is number of samples / batch size. Default value'
@@ -70,7 +70,8 @@ parser.add_argument('--tensorboard', action='store_true',
                     help='Dump tensorboard log files  to current directory')
 
 parser.add_argument('--gpu', action='store_true',
-                    help='Use NVIDIA GPU if available')
+                    help='Use NVIDIA GPU if available. This is specific to RNN models. '
+                         'For other models GPU will be automatically detected.')
 
 args = parser.parse_args()
 
@@ -140,6 +141,8 @@ if __name__ == '__main__':
                       gpu=args.gpu)
     elif args.model == 'moe':
         kwargs = dict(input_shape=input_shape, num_experts=args.num_experts)
+    elif (args.model == 'resnet') or (args.model == 'logistic'):
+        kwargs = dict(input_shape=input_shape)
     else:
         kwargs = dict(input_shape=input_shape,
                       batch_normalization=args.batch_normalization,
@@ -148,9 +151,7 @@ if __name__ == '__main__':
     model = create_model(units, choice=args.model, loss_fn=args.loss_fn,
                          optimizer=args.optimizer, **kwargs)
 
-    model_name = args.model
-    if units is not None:
-        model_name = model_name + '_' + str(units) + '_' + args.feature
+    model_name = args.model + '_' + str(units) + '_' + args.feature
 
     # Start training the model
 
@@ -165,4 +166,4 @@ if __name__ == '__main__':
     model_history[args.model.upper()] = history
     param_history[args.model.upper() + '_PARAMS'] = model.count_params()
 
-    dump_results(model_history, param_history, fname='pickles/'+model_name+'.pkl')
+    dump_results(model_history, param_history, fname=model_name+'.pkl')

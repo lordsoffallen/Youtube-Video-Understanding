@@ -108,7 +108,7 @@ def train_model(model, train_data, val_data, steps_per_epoch=None, validation_st
     stop = EarlyStopping(patience=2)
     callbacks = [stop]
     if checkpoint:
-        path = "model-{epoch:02d}-{val_loss:.2f}.h5"
+        path = "model-{epoch:02d}-{val_loss:.4f}.h5"
         checkpoint = ModelCheckpoint(path, verbose=1)
         callbacks.append(checkpoint)
 
