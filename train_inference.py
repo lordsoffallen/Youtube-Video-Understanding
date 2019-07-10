@@ -160,7 +160,7 @@ if __name__ == '__main__':
         model_name += '_drop'
 
     if args.model == 'moe':
-        model_name += '_expert_' + args.num_experts
+        model_name += '_expert_' + str(args.num_experts)
 
     # Start training the model
 
