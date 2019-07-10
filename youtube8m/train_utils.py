@@ -27,7 +27,7 @@ def hit_at_n(y_true, y_pred, batch_size=32, n=3):
     return tf.reduce_mean(tf.cast(hits, tf.float32))
 
 
-def find_steps_per_epoch(files_list, batch_size):
+def find_steps_per_epoch(files_list, batch_size, log=False):
     """ Finds the steps_per_epoch value from Dataset class.
 
     Parameters
@@ -43,8 +43,12 @@ def find_steps_per_epoch(files_list, batch_size):
         Returns computed steps_per_epoch value
     """
 
-    print('Computing data size. This may take a while...')
+    if log:
+        print('Computing data size. This may take a while...')
     data_len = sum([len([1 for _ in tf.io.tf_record_iterator(f)]) for f in files_list])
-    print('Steps_per_epoch should be length of data / batch size.')
-    print('{} / {} =~ {}'.format(data_len, batch_size, round(data_len / batch_size)))
+
+    if log:
+        print('Steps_per_epoch should be length of data / batch size.')
+        print('{} / {} =~ {}'.format(data_len, batch_size, round(data_len / batch_size)))
+
     return round(data_len / batch_size)

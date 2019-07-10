@@ -1,3 +1,6 @@
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
+
 from youtube8m.train import train_model, create_model
 from youtube8m.train_utils import find_steps_per_epoch
 from youtube8m.data import Youtube8mData
@@ -152,6 +155,15 @@ if __name__ == '__main__':
                          optimizer=args.optimizer, **kwargs)
 
     model_name = args.model + '_' + str(units) + '_' + args.feature
+
+    if args.batch_normalization:
+        model_name += '_bn'
+
+    if args.dropout:
+        model_name += '_drop'
+
+    if args.model == 'moe':
+        model_name += '_expert_' + args.num_experts
 
     # Start training the model
 

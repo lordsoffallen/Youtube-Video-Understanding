@@ -76,7 +76,7 @@ def create_model(units=None, choice='mlp', loss_fn='huber', optimizer='adam', ba
 
 
 def train_model(model, train_data, val_data, steps_per_epoch=None, validation_steps=None,
-                tensorboard=True, checkpoint=True, model_name='resnet'):
+                tensorboard=True, checkpoint=True, model_name='resnet', save_model=False):
     """ Trains a keras model given a train and validation datasets. It will checkpoint the best
     model at each epoch. When model contains Lambda layers, checkpoint should be false.
 
@@ -98,6 +98,8 @@ def train_model(model, train_data, val_data, steps_per_epoch=None, validation_st
         If true use checkpoint callback to store model
     model_name: str
         Model name in str format. Used when saving the model
+    save_model: bool
+        Whether to save the model or not.
 
     Returns
     -------
@@ -105,8 +107,9 @@ def train_model(model, train_data, val_data, steps_per_epoch=None, validation_st
         Keras history object contains training history data
     """
 
-    stop = EarlyStopping(patience=2)
-    callbacks = [stop]
+    loss_stop = EarlyStopping(patience=2)
+    acc_stop = EarlyStopping(monitor='val_hit1', patience=2)
+    callbacks = [loss_stop, acc_stop]
     if checkpoint:
         path = "model-{epoch:02d}-{val_loss:.4f}.h5"
         checkpoint = ModelCheckpoint(path, verbose=1)
@@ -116,12 +119,14 @@ def train_model(model, train_data, val_data, steps_per_epoch=None, validation_st
         board = TensorBoard(log_dir='./logs/')
         callbacks.append(board)
 
-    history = model.fit(x=train_data, steps_per_epoch=steps_per_epoch, epochs=10,
+    history = model.fit(x=train_data, steps_per_epoch=steps_per_epoch, epochs=20,
                         validation_data=val_data, validation_steps=validation_steps,
                         verbose=1, callbacks=callbacks)
 
-    if model_name.startswith('moe'):
-        model.save_weights(model_name+'_weights.h5')
-    else:
-        model.save(model_name+'.h5', include_optimizer=False)
+    if save_model:
+        if model_name.startswith('moe'):
+            model.save_weights(model_name+'_weights.h5')
+        else:
+            model.save(model_name+'.h5', include_optimizer=False)
+
     return history
