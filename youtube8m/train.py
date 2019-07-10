@@ -108,7 +108,7 @@ def train_model(model, train_data, val_data, steps_per_epoch=None, validation_st
     """
 
     loss_stop = EarlyStopping(patience=2)
-    acc_stop = EarlyStopping(monitor='val_hit1', patience=2)
+    acc_stop = EarlyStopping(monitor='val_hit1', patience=2, mode='max')
     callbacks = [loss_stop, acc_stop]
     if checkpoint:
         path = "model-{epoch:02d}-{val_loss:.4f}.h5"
