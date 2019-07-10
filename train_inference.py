@@ -1,6 +1,3 @@
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL']='3'
-
 from youtube8m.train import train_model, create_model
 from youtube8m.train_utils import find_steps_per_epoch
 from youtube8m.data import Youtube8mData
