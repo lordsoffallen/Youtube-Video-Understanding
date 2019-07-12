@@ -1,6 +1,6 @@
 from tensorflow.python.keras import Model, Sequential, Input
 from tensorflow.python.keras.backend import sum
-from tensorflow.python.keras.layers import Dense, Flatten, LSTM, GRU, Activation, Dropout
+from tensorflow.python.keras.layers import Dense, LSTM, GRU, Activation, Dropout
 from tensorflow.python.keras.layers import Conv1D, MaxPooling1D, CuDNNLSTM, CuDNNGRU, GlobalAveragePooling1D
 from tensorflow.python.keras.layers import BatchNormalization, Add, Reshape, Multiply, Lambda
 from tensorflow.python.keras.regularizers import l2
