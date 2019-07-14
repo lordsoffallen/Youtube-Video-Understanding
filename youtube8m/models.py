@@ -476,7 +476,7 @@ class RNNModel(BaseModel):
                  include_top=True,
                  last_activation='sigmoid',
                  batch_normalization=False,
-                 kernel_regularizer=l2(1e-8),
+                 kernel_regularizer=l2(1e-7),
                  dropout=False,
                  gpu=False,
                  summary=False,
@@ -527,21 +527,31 @@ class RNNModel(BaseModel):
         else:
             for c, unit in enumerate(self.units, start=1):
                 if c == len(self.units):  # Last element. Return sequence is false
-                    model.add(self.LAYER_TYPE(unit, activation=None,
-                                              kernel_regularizer=self.kernel_regularizer))
+                    if self.gpu:
+                        model.add(self.LAYER_TYPE(unit, kernel_regularizer=self.kernel_regularizer))
+                    else:
+                        model.add(self.LAYER_TYPE(unit, activation=None,
+                                                  kernel_regularizer=self.kernel_regularizer))
                 else:
-                    model.add(self.LAYER_TYPE(unit, activation=None,
-                                              kernel_regularizer=self.kernel_regularizer,
-                                              return_sequences=True))
+                    if self.gpu:
+                        model.add(self.LAYER_TYPE(unit, kernel_regularizer=self.kernel_regularizer,
+                                                  return_sequences=True))
+                    else:
+                        model.add(self.LAYER_TYPE(unit, activation=None,
+                                                  kernel_regularizer=self.kernel_regularizer,
+                                                  return_sequences=True))
 
-                if self.batch_normalization:
+                if self.batch_normalization and not self.gpu:
                     model.add(BatchNormalization())
                     model.add(Activation('tanh'))
-                elif self.dropout:
-                    model.add(Activation('tanh'))
-                    model.add(Dropout(self.dropout_rate))
-                else:
-                    model.add(Activation('tanh'))
+                    
+                if self.dropout:
+                    if self.gpu:
+                        model.add(Dropout(self.dropout_rate))
+                    else:
+                        model.add(Activation('tanh'))
+                        model.add(Dropout(self.dropout_rate))
+                
 
         if self.include_top:
             model.add(Dense(self.num_classes,
