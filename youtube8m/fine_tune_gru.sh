@@ -23,22 +23,20 @@ for feature in rgb audio all ; do
             echo
             python train_inference.py -m gru -u "$i, $i, $i" -f ${feature} -l ${loss} --gpu
 
-            for norm in batch_normalization dropout ; do
-                echo
-                echo "TRAINING MODEL: UNITS ($i) FEATURE ($feature) LOSS ($loss) and ($norm)....."
-                echo
-                python train_inference.py -m gru -u "$i" -f ${feature} -l ${loss} --${norm} --gpu
+            echo
+            echo "TRAINING MODEL: UNITS ($i) FEATURE ($feature) LOSS ($loss) and dropout....."
+            echo
+            python train_inference.py -m gru -u "$i" -f ${feature} -l ${loss} --dropout --gpu
 
-                echo
-                echo "TRAINING MODEL: UNITS ($i, $i) FEATURE ($feature) LOSS ($loss) and ($norm)....."
-                echo
-                python train_inference.py -m gru -u "$i, $i" -f ${feature} -l ${loss} --${norm} --gpu
+            echo
+            echo "TRAINING MODEL: UNITS ($i, $i) FEATURE ($feature) LOSS ($loss) and dropout....."
+            echo
+            python train_inference.py -m gru -u "$i, $i" -f ${feature} -l ${loss} --dropout --gpu
 
-                echo
-                echo "TRAINING MODEL: UNITS ($i, $i, $i) FEATURE ($feature) LOSS ($loss) and ($norm)....."
-                echo
-                python train_inference.py -m gru -u "$i, $i, $i" -f ${feature} -l ${loss} --${norm} --gpu
-            done
+            echo
+            echo "TRAINING MODEL: UNITS ($i, $i, $i) FEATURE ($feature) LOSS ($loss) and dropout....."
+            echo
+            python train_inference.py -m gru -u "$i, $i, $i" -f ${feature} -l ${loss} --dropout --gpu
         done
     done
 done
