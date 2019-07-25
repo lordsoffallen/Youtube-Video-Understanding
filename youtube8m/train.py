@@ -76,7 +76,7 @@ def create_model(units=None, choice='mlp', loss_fn='huber', optimizer='adam', ba
 
 
 def train_model(model, train_data, val_data, steps_per_epoch=None, validation_steps=None,
-                tensorboard=True, checkpoint=True, model_name='resnet', save_model=False):
+                tensorboard=True, checkpoint=True, model_name='resnet', save_model=True):
     """ Trains a keras model given a train and validation datasets. It will checkpoint the best
     model at each epoch. When model contains Lambda layers, checkpoint should be false.
 
