@@ -24,19 +24,20 @@ for feature in rgb audio all ; do
             python train_inference.py -m lstm -u "$i, $i, $i" -f ${feature} -l ${loss} --gpu
 
             echo
-            echo "TRAINING MODEL: UNITS ($i) FEATURE ($feature) LOSS ($loss) and dropout....."
+            echo "TRAINING MODEL: UNITS ($i) FEATURE ($feature) LOSS ($loss) and dropout ....."
             echo
             python train_inference.py -m lstm -u "$i" -f ${feature} -l ${loss} --dropout --gpu
 
             echo
-            echo "TRAINING MODEL: UNITS ($i, $i) FEATURE ($feature) LOSS ($loss) and dropout....."
+            echo "TRAINING MODEL: UNITS ($i, $i) FEATURE ($feature) LOSS ($loss) and dropout ....."
             echo
             python train_inference.py -m lstm -u "$i, $i" -f ${feature} -l ${loss} --dropout --gpu
 
             echo
-            echo "TRAINING MODEL: UNITS ($i, $i, $i) FEATURE ($feature) LOSS ($loss) and dropout....."
+            echo "TRAINING MODEL: UNITS ($i, $i, $i) FEATURE ($feature) LOSS ($loss) and dropout ....."
             echo
             python train_inference.py -m lstm -u "$i, $i, $i" -f ${feature} -l ${loss} --dropout --gpu
+
         done
     done
 done

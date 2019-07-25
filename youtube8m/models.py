@@ -179,7 +179,7 @@ class ResNetModel(BaseModel):
     def __init__(self, units=None,
                  include_top=True,
                  last_activation='sigmoid',
-                 kernel_regularizer=l2(1e-8),
+                 kernel_regularizer=l2(1e-7),
                  summary=False,
                  input_shape=(1024,),
                  num_classes=3862):
@@ -551,7 +551,6 @@ class RNNModel(BaseModel):
                     else:
                         model.add(Activation('tanh'))
                         model.add(Dropout(self.dropout_rate))
-                
 
         if self.include_top:
             model.add(Dense(self.num_classes,

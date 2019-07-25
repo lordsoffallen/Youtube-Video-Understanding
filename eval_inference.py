@@ -32,7 +32,6 @@ args = parser.parse_args()
 if __name__ == '__main__':
     # Read record files from the data directory
     val_records = glob(args.val_records + 'val*.tfrecord')
-    val_records = val_records[:30]
 
     # Working on video data therefore using example parser. Train true because we need labels
     kwargs = dict(parser_fn='example', train=True, repeats=1,

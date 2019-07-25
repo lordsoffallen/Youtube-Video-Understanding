@@ -26,19 +26,20 @@ parser.add_argument('-m', '--model', type=str, default='logistic',
                     choices=['mlp', 'cnn', 'gru', 'lstm', 'logistic', 'resnet', 'moe'],
                     help='Select a model to train. Default model is logistic.')
 
-parser.add_argument('-l', '--loss_fn', type=str, default='huber', choices=['huber', 'binary', 'hamming'],
+parser.add_argument('-l', '--loss_fn', type=str, default='binary', choices=['huber', 'binary', 'hamming'],
                     help='Loss function to use in model. Huber and binary crossentropy '
-                         'are performing well. Default is huber function')
+                         'are performing well. Hamming is not working at the moment. '
+                         'Default is binary function')
 
-parser.add_argument('-o', '--optimizer', type=str, default='adam', choices=['adam', 'sgd'],
-                    help='Optimizer to use in model. Default is adam optimizer.')
+parser.add_argument('-o', '--optimizer', type=str, default='sgd', choices=['adam', 'sgd'],
+                    help='Optimizer to use in model. Default is sgd optimizer.')
 
 parser.add_argument('-u', '--units', type=str, default=None,
                     help='Unit size parameter for the model. If multiple, then pass it in string format '
                          'e.g: "128, 256, 512" or for single units just a 512. Defaul is None')
 
-parser.add_argument('-f', '--feature', type=str, default='rgb', choices=['audio', 'rgb', 'all'],
-                    help='Which feature to use when training the model. Default is rgb.')
+parser.add_argument('-f', '--feature', type=str, default='all', choices=['audio', 'rgb', 'all'],
+                    help='Which feature to use when training the model. Default is all.')
 
 parser.add_argument('-b', '--batch_size', type=int, default=32, help='Default batch size is 32')
 
@@ -85,7 +86,6 @@ if __name__ == '__main__':
     # Read record files from the data directory
     train_records = glob(args.train_records + 'train*.tfrecord')
     val_records = glob(args.val_records + 'val*.tfrecord')
-    val_records = val_records[:15]      # Select 15 records for validation
 
     # Init steps_per_epoch and validation_steps variables
     if args.steps_per_epoch == 0:

@@ -237,7 +237,7 @@ class EvaluationMetrics(object):
         --------
         metrics: dict
             A dictionary storing the evaluation metrics for the epoch. The dictionary
-            has the fields: avg_hit_at_one, avg_perr, aps (default nan) and gap.
+            has the fields: avg_hit_at_one, avg_perr, aps (default nan), gap, lrap and precision.
         """
 
         if self.num_examples <= 0:
